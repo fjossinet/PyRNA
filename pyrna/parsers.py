@@ -99,7 +99,7 @@ def parse_vienna(vienna_data):
 
     Returns:
     ------
-    list of RNA objects and list of secondary structures as a list of BasePair objects
+    tuple containg a list of RNA objects and a list of secondary structures, each 2D described as a list of BasePair objects
     """
     name = None
     secondary_structures = []

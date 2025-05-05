@@ -189,7 +189,7 @@ class BasePair:
 
 class SecondaryStructure:
     """
-    This class stores everything describing a secondary structure: helcies, junctions, tertiary interactions...
+    This class stores everything describing a secondary structure: helices, junctions, tertiary interactions...
     """
     def __init__(self, rna):
         self.name = "2D"
