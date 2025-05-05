@@ -151,7 +151,7 @@ def parse_bn(bn):
             lastPairedPos.append(i)
             lastPairedSymbol.append(s)
         elif s in [')','}',']']:
-            basePairs.append(BasePair(lastPairedSymbol.pop(), lastPairedPos.pop()))
+            basePairs.append(BasePair(lastPairedPos.pop(),i))
 
     return basePairs
 

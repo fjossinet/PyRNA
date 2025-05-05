@@ -21,7 +21,7 @@ class Location:
     def __init__(self, start = None, end = None, single_positions = None, nested_lists = None):
         """
         To instantiate a Location, you can:
-        - set a start and end position: Location(start=34, end=69). The location will contain all the positions between the start end end.
+        - set a start and end position: Location(start=34, end=69). The location will contain all the positions between the start and end.
         - list all the single positions (sorted or not) to be contained in the location: Location(single_positions=[34, 56, 57, 58, 67, 68, 69])
         - list the ranges of continuous positions as nested lists: Location(nested_lists=[[34,34], [56,58], [67,69]])
         """
@@ -185,7 +185,7 @@ class RNA(Molecule):
     
 class BasePair:
     def __init__(self, pos1, pos2):
-        self.location = Location(single_positions=[pos1,pos2])
+        self.location = Location(nested_lists=[[pos1,pos1],[pos2,pos2]])
 
 class SecondaryStructure:
     """
