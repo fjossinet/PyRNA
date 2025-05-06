@@ -6,9 +6,7 @@ def to_pdb(tertiary_structure, location = None):
     Convert a TertiaryStructure object into PDB data
 
     Parameters:
-    ---------            if export_numbering_system:
-                lines.append("%-6s%5u  %-4s%3s %s%4s    %8.3f%8.3f%8.3f"%("ATOM", i, atom['name'], tertiary_structure.rna.sequence[key-1], tertiary_structure.rna.name[0], tertiary_structure.get_residue_label(key), atom['coords'][0], atom['coords'][1], atom['coords'][2]))
-            else:
+    -----------
     - tertiary_structure: a TertiaryStructure object (see pyrna.model)
     - location (default: None): a Location object (see pyrna.model). Restrict the export to the atoms of the residues enclosed by this location.
 
@@ -53,6 +51,60 @@ def to_fasta(molecules, single_line=False):
     for molecule in molecules:
         outputs.append(molecule.to_fasta(single_line))
     return '\n'.join(outputs)
+
+def to_rnaml(rna, bps):
+    """
+    Convert an RNA object and its list of base-pairs into RNAML data
+
+    Parameters:
+    -----------
+    - rna: an RNA object (see pyrna.model)
+    - bps: a list of BasePair objects
+
+    Returns:
+    ------
+    the RNAML data as a String
+    """
+    for i in range(0,len(bps)):
+        data = """\
+<rnaml version="1.1">
+  <molecule id="{rna_name}">
+    <identity>
+      <name>{rna_name}</name>
+    </identity>
+    <sequence length="">
+        <seq-data>
+        {rna_sequence}
+        </seq-data>
+    </sequence>
+    <structure>
+        <model id="{model_id}">		        				    
+            <str-annotation>""".format(rna_name = rna[i].name, rna_sequence = rna[i].sequence, model_id = i+1)
+        for bp in bps[i]:
+            data += """
+                <base-pair">
+                    <base-id-5p>
+                        <base-id>
+                            <position>{bp_start}</position>
+                        </base-id>
+                    </base-id-5p>
+                    <base-id-3p>
+                        <base-id>
+                            <position>{bp_end}</position>
+                        </base-id>
+                    </base-id-3p>
+                    <edge-5p>W</edge-5p>
+                    <edge-3p>W</edge-3p>
+                    <bond-orientation>cis</bond-orientation>
+                </base-pair>""".format(bp_start = bp.location.start(), bp_end = bp.location.end())
+            
+        data += """
+            </str-annotation>	
+        </model>
+    </structure>		
+  </molecule>			
+</rnaml>"""
+    return data
 
 
 def parse_fasta(fasta_data):
