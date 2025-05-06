@@ -24,4 +24,4 @@ the source code for PyRNA is divided into 3 modules:
 scripts using the PyRNA library
 
 ## More to come soon
-The package will be further extended according to the educational demand.
+The package will be further extended according to the educational demand
