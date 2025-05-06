@@ -219,7 +219,7 @@ class TertiaryStructure:
         self.name = "N.A."
         self.residues = [] #a list of Residue3D objects
 
-    def add_atom(self, atom_name, absolute_position, coords):
+    def add_atom(self, atom_name, residue_name, absolute_position, coords):
         atom_name = re.sub("\*", "'", atom_name)
         if atom_name == 'OP1':
             atom_name = 'O1P'
@@ -228,7 +228,9 @@ class TertiaryStructure:
         elif atom_name == 'OP3':
             atom_name = 'O3P'
         if absolute_position-1 >= len(self.residues):
+            self.rna.add_residue(residue_name)
             self.residues.append(Residue3D())
+            
         self.residues[absolute_position-1].add_atom(atom_name,coords)
             
 modified_ribonucleotides = {

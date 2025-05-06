@@ -169,7 +169,7 @@ def parse_pdb(pdb_data):
     chains = []
     tertiary_structures = []
     current_chain = None
-    current_residue = None
+    current_residue_name = None
     current_residue_pos = None
     absolute_position = -1
     current_molecule = None
@@ -186,37 +186,26 @@ def parse_pdb(pdb_data):
 
         if (header == "ATOM" or header == "HETATM") and not residue_name in ["FMN","PRF","HOH","MG","OHX","MN","ZN", "SO4", "CA", "UNK", "AMO"] and not atom_name in ["MG","K", "NA", "SR", "CL", "CD", "ACA"] and len(chain_name):
             if chain_name != current_chain: #new chain
-                current_residue = residue_name
+                current_residue_name = residue_name
                 current_residue_pos = residue_pos
                 current_chain = chain_name
                 absolute_position = 1
                 residues = []
-                current_molecule = None
-                residues.append(current_residue)
+                current_molecule = RNA(sequence="", name = current_chain)
+                residues.append(current_residue_name)
                 current_3D = TertiaryStructure(current_molecule)
                 current_3D.title = re.sub(' +', ' ', title)
+                tertiary_structures.append(current_3D)
 
             elif current_residue_pos != residue_pos: # new residue
-                current_residue = residue_name
+                current_residue_name = residue_name
                 current_residue_pos = residue_pos
-                if current_molecule:
-                    current_molecule.add_residue(current_residue)
-                else:
-                    residues.append(current_residue)
                 absolute_position += 1
 
             x = float(line[30:38].strip())
             y = float(line[38:46].strip())
             z = float(line[46:54].strip())
-            current_3D.add_atom(atom_name, absolute_position, [x,y,z])
-
-            if (atom_name == "O4'" or atom_name == "O4*") and not current_molecule in molecules:
-                current_molecule = RNA(sequence="", name = current_chain)
-                current_3D.rna = current_molecule
-                for residue in residues:
-                    current_molecule.add_residue(current_residue)
-                molecules.append(current_molecule)
-                tertiary_structures.append(current_3D)
+            current_3D.add_atom(atom_name, current_residue_name, absolute_position, [x,y,z])
 
         elif header == 'TITLE':
             title += line[10:]
