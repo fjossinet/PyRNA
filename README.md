@@ -18,13 +18,14 @@ export PATH=$PATH:$PYRNA_HOME/scripts
 the source code for PyRNA is divided into 3 modules:
 * model: the RNA concepts. So far, the available concepts are:
     * Block: contiguous positions between a start and an end position
-    * Location: a list of Block objects
-    * Molecule: stores a name, an organism name, a sequence and a bunch of modified residues
+    * Location: encapsulates a list of Block objects
+    * Molecule: encapsulates a name, an organism name, a sequence and a bunch of modified residues
     * RNA: a specialized Molecule. Its sequence can be made with the following characters : A, U, G, C, - and _. 
     * BasePair
     * SecondaryStructure
-    * Atom: stores an atom name, x, y and z coordinates
-    * TertiaryStructure
+    * Atom: encapsulates an atom name, x, y and z coordinates
+    * Residue3D: encapsulates a list of Atom objects
+    * TertiaryStructure: encapsulates a list Residue3D objects
 * parsers: functions to load PyRNA objects from RNA files (PDB, FASTA, Vienna, RNAML,...) or to dump them into files
 * db: load data from public databases
 
