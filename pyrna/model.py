@@ -184,8 +184,18 @@ class RNA(Molecule):
     
     
 class BasePair:
-    def __init__(self, pos1, pos2):
+    def __init__(self, pos1, pos2, edge1 = "WC", edge2 = "WC", orientation = "cis"):
+        """
+        Parameters:
+        ---------
+        edge1: string. Can be WC, H or SE
+        edge2: string. Can be WC, H or SE
+        orientation: string. Can be cis or trans
+        """
         self.location = Location(nested_lists=[[pos1,pos1],[pos2,pos2]])
+        self.edge1 = edge1
+        self.edge2 = edge2
+        self.orientation = orientation
 
 class SecondaryStructure:
     """
