@@ -207,6 +207,7 @@ class SecondaryStructure:
         self.tertiary_interactions = []
         self.helices = []
         self.junctions = []
+        self.base_pairs = []
 
 class Atom:
     def __init__(self, name, x, y, z):
