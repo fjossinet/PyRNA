@@ -1,15 +1,16 @@
 import re
 from pyrna.model import RNA, BasePair, TertiaryStructure
 
-def to_pdb(tertiary_structure, location = None, export_numbering_system = False):
+def to_pdb(tertiary_structure, location = None):
     """
     Convert a TertiaryStructure object into PDB data
 
     Parameters:
-    ---------
+    ---------            if export_numbering_system:
+                lines.append("%-6s%5u  %-4s%3s %s%4s    %8.3f%8.3f%8.3f"%("ATOM", i, atom['name'], tertiary_structure.rna.sequence[key-1], tertiary_structure.rna.name[0], tertiary_structure.get_residue_label(key), atom['coords'][0], atom['coords'][1], atom['coords'][2]))
+            else:
     - tertiary_structure: a TertiaryStructure object (see pyrna.model)
     - location (default: None): a Location object (see pyrna.model). Restrict the export to the atoms of the residues enclosed by this location.
-    - export_numbering_system (default: False): export the numbering system. If False, the residues are numbered from 1 to the length of the molecular chain
 
     Returns:
     ------
@@ -28,10 +29,7 @@ def to_pdb(tertiary_structure, location = None, export_numbering_system = False)
     for key in keys:
         atoms = tertiary_structure.residues[key]['atoms']
         for atom in atoms:
-            if export_numbering_system:
-                lines.append("%-6s%5u  %-4s%3s %s%4s    %8.3f%8.3f%8.3f"%("ATOM", i, atom['name'], tertiary_structure.rna.sequence[key-1], tertiary_structure.rna.name[0], tertiary_structure.get_residue_label(key), atom['coords'][0], atom['coords'][1], atom['coords'][2]))
-            else:
-                lines.append("%-6s%5u  %-4s%3s %s%4u    %8.3f%8.3f%8.3f"%("ATOM", i, atom['name'], tertiary_structure.rna.sequence[key-1], tertiary_structure.rna.name[0], key, atom['coords'][0], atom['coords'][1], atom['coords'][2]))
+            lines.append("%-6s%5u  %-4s%3s %s%4u    %8.3f%8.3f%8.3f"%("ATOM", i, atom['name'], tertiary_structure.rna.sequence[key-1], tertiary_structure.rna.name[0], key, atom['coords'][0], atom['coords'][1], atom['coords'][2]))
             i += 1
 
     lines.append("END")
@@ -197,7 +195,6 @@ def parse_pdb(pdb_data):
                 residues.append(current_residue)
                 current_3D = TertiaryStructure(current_molecule)
                 current_3D.title = re.sub(' +', ' ', title)
-                current_3D.numbering_system[str(absolute_position)] = current_residue_pos
 
             elif current_residue_pos != residue_pos: # new residue
                 current_residue = residue_name
@@ -207,7 +204,6 @@ def parse_pdb(pdb_data):
                 else:
                     residues.append(current_residue)
                 absolute_position += 1
-                current_3D.numbering_system[str(absolute_position)] = current_residue_pos
 
             x = float(line[30:38].strip())
             y = float(line[38:46].strip())

@@ -198,13 +198,19 @@ class SecondaryStructure:
         self.helices = []
         self.junctions = []
 
+class Atom:
+    def __init__(self, name, x, y, z):
+        self.name = name
+        self.x = x
+        self.y = y
+        self.z = z
+
 class TertiaryStructure:
 
     def __init__(self, rna):
         self.rna = rna
         self.name = "N.A."
-        self.residues = {} #the keys are the absolute position of residues
-        self.numbering_system = {}
+        self.atoms = [] #a matrix of Atom objects
 
     def add_atom(self, atom_name, absolute_position, coords):
         atom_name = re.sub("\*", "'", atom_name)
@@ -214,25 +220,11 @@ class TertiaryStructure:
             atom_name = 'O2P'
         elif atom_name == 'OP3':
             atom_name = 'O3P'
-        if absolute_position in self.residues:
-            self.residues[absolute_position]['atoms'].append({
-                    'name': atom_name,
-                    'coords': coords
-                })
+        if absolute_position-1 < len(self.atoms):
+            self.atoms[absolute_position-1].append(Atom(atom_name, coords[0], coords[1], coords[2]))
         else:
-             self.residues[absolute_position] = {
-                'atoms': [{
-                    'name': atom_name,
-                    'coords': coords
-                }]
-             }
-
-    def get_residue_label(self, absolute_position):
-        if str(absolute_position) in self.numbering_system:
-            return self.numbering_system[str(absolute_position)]
-        else:
-            return str(absolute_position)
-
+            self.atoms.append([Atom(atom_name, coords[0], coords[1], coords[2])])
+    
 modified_ribonucleotides = {
     "T": "U",
     "PSU": "U",
