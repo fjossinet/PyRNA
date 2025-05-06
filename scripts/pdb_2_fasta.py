@@ -13,4 +13,7 @@ def fetch(pdb_id):
     print(to_fasta([ts.rna for ts in parse_pdb(content)]))  
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: pdb2_fasta.py PDB_ID (try for example: pdb2_fasta.py 1HR2)")
+        sys.exit()
     fetch(sys.argv[1])

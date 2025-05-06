@@ -50,4 +50,7 @@ def to_rnaml(vienna_file):
             
     
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: vienna_to_rnaml.py vienna_file (try for example: ./vienna_to_rnaml.py ./data/sample.vienna)")
+        sys.exit()
     to_rnaml(sys.argv[1])
