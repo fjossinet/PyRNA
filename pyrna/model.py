@@ -197,6 +197,17 @@ class BasePair:
         self.edge2 = edge2
         self.orientation = orientation
 
+class Helix:
+    def __init__(self, start, end, length):
+        """
+        Parameters:
+        ---------
+        start: the position of the first residue in the first strand 
+        end: the position of the last residue in the second strand 
+        length: helix size, meaning the number of basepairs
+        """
+        self.location = Location(nested_lists=[[start,start+length-1],[end-length+1,end]])
+
 class SecondaryStructure:
     """
     This class stores everything describing a secondary structure: helices, junctions, tertiary interactions...

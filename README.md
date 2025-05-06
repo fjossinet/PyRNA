@@ -22,6 +22,7 @@ the source code for PyRNA is divided into 3 modules:
     * Molecule: encapsulates a name, an organism name, a sequence and a bunch of modified residues
     * RNA: a specialized Molecule. Its sequence can be made with the following characters : A, U, G, C, - and _. 
     * BasePair
+    * Helix
     * SecondaryStructure
     * Atom: encapsulates an atom name, x, y and z coordinates
     * Residue3D: encapsulates a list of Atom objects
