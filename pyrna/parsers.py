@@ -218,14 +218,6 @@ def parse_pdb(pdb_data):
                 molecules.append(current_molecule)
                 tertiary_structures.append(current_3D)
 
-            elif (atom_name == "CA") and not current_molecule in molecules:
-                current_molecule = Protein(sequence="", name = current_chain)
-                current_3D.rna = current_molecule
-                for residue in residues:
-                    current_molecule.add_residue(current_residue)
-                molecules.append(current_molecule)
-                tertiary_structures.append(current_3D)
-
         elif header == 'TITLE':
             title += line[10:]
 

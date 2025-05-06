@@ -205,12 +205,19 @@ class Atom:
         self.y = y
         self.z = z
 
+class Residue3D:
+    def __init__(self):
+        self.atoms = [] #a list of Atom objects
+
+    def add_atom(self, atom_name, coords):
+        self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+
 class TertiaryStructure:
 
     def __init__(self, rna):
         self.rna = rna
         self.name = "N.A."
-        self.atoms = [] #a matrix of Atom objects
+        self.residues = [] #a list of Residue3D objects
 
     def add_atom(self, atom_name, absolute_position, coords):
         atom_name = re.sub("\*", "'", atom_name)
@@ -220,11 +227,10 @@ class TertiaryStructure:
             atom_name = 'O2P'
         elif atom_name == 'OP3':
             atom_name = 'O3P'
-        if absolute_position-1 < len(self.atoms):
-            self.atoms[absolute_position-1].append(Atom(atom_name, coords[0], coords[1], coords[2]))
-        else:
-            self.atoms.append([Atom(atom_name, coords[0], coords[1], coords[2])])
-    
+        if absolute_position-1 >= len(self.residues):
+            self.residues.append(Residue3D())
+        self.residues[absolute_position-1].add_atom(atom_name,coords)
+            
 modified_ribonucleotides = {
     "T": "U",
     "PSU": "U",
