@@ -93,7 +93,7 @@ class Location:
         """
         single_positions = []
         for block in self.blocks:
-            single_positions += xrange(block.start, block.end+1)
+            single_positions += range(block.start, block.end+1)
         return single_positions
 
     def has_position(self, position):
