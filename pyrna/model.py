@@ -228,7 +228,8 @@ class Atom:
         self.z = z
 
 class Residue3D:
-    def __init__(self):
+    def __init__(self, residue_name):
+        self.residue_name = residue_name
         self.atoms = [] #a list of Atom objects
 
     def add_atom(self, atom_name, coords):
@@ -251,7 +252,7 @@ class TertiaryStructure:
             atom_name = 'O3P'
         if absolute_position-1 >= len(self.residues):
             self.rna.add_residue(residue_name)
-            self.residues.append(Residue3D())
+            self.residues.append(Residue3D(residue_name))
             
         self.residues[absolute_position-1].add_atom(atom_name,coords)
             
