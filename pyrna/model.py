@@ -227,13 +227,116 @@ class Atom:
         self.y = y
         self.z = z
 
+    def __str__(self):
+        return self.name
+
+class EndocyclicA(Atom):
+    def __init__(self, name, x, y, z):
+        Atom.__init__(self,name, x, y, z)
+
+    def __str__(self):
+        return self.name
+
+class DonorEndoA(EndocyclicA):
+    def __init__(self, name, x, y, z):
+        EndocyclicA.__init__(self,name, x, y, z)
+
+    def __str__(self):
+        return self.name
+
+class AcceptorEndoA(EndocyclicA):
+    def __init__(self, name, x, y, z):
+        EndocyclicA.__init__(self,name, x, y, z)
+
+    def __str__(self):
+        return self.name
+
+class ExocyclicA(Atom):
+    def __init__(self, name, x, y, z):
+        Atom.__init__(self,name, x, y, z)
+
+    def __str__(self):
+        return self.name
+
+class DonorExoA(ExocyclicA):
+    def __init__(self, name, x, y, z):
+        ExocyclicA.__init__(self,name, x, y, z)
+
+    def __str__(self):
+        return self.name
+
+class AcceptorExoA:
+    def __init__(self, name, x, y, z):
+        ExocyclicA.__init__(self,name, x, y, z)
+
+    def __str__(self):
+        return self.name
+
 class Residue3D:
-    def __init__(self, residue_name):
-        self.residue_name = residue_name
+    def __init__(self):
         self.atoms = [] #a list of Atom objects
 
     def add_atom(self, atom_name, coords):
         self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+
+class Guanine3D(Residue3D):
+    def __init__(self):
+        Residue3D.__init__(self)
+
+    def add_atom(self, atom_name, coords):
+        match atom_name:
+            case "N1": self.atoms.append(DonorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N2": self.atoms.append(DonorExoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N3": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case "O6": self.atoms.append(AcceptorExoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N7": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+    
+    def __str__(self):
+        return "G"
+
+class Adenine3D(Residue3D):
+    def __init__(self):
+        Residue3D.__init__(self)
+
+    def add_atom(self, atom_name, coords):
+        match atom_name:
+            case "N1": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N3": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N6": self.atoms.append(DonorExoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N7": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+
+    def __str__(self):
+        return "A"
+
+class Uracil3D(Residue3D):
+    def __init__(self):
+        Residue3D.__init__(self)
+
+    def add_atom(self, atom_name, coords):
+        match atom_name:
+            case "O2": self.atoms.append(AcceptorExoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N3": self.atoms.append(DonorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case "O4": self.atoms.append(AcceptorExoA(atom_name, coords[0], coords[1], coords[2]))
+            case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+
+    def __str__(self):
+        return "U"
+
+class Cytosine3D(Residue3D):
+    def __init__(self):
+        Residue3D.__init__(self)
+
+    def add_atom(self, atom_name, coords):
+        match atom_name:
+            case "O2": self.atoms.append(AcceptorExoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N3": self.atoms.append(DonorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N4": self.atoms.append(DonorExoA(atom_name, coords[0], coords[1], coords[2]))
+            case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+
+    def __str__(self):
+        return "C"
 
 class TertiaryStructure:
 
@@ -252,8 +355,12 @@ class TertiaryStructure:
             atom_name = 'O3P'
         if absolute_position-1 >= len(self.residues):
             self.rna.add_residue(residue_name)
-            self.residues.append(Residue3D(residue_name))
-            
+            match(residue_name):
+                case "A": self.residues.append(Adenine3D())
+                case "G": self.residues.append(Guanine3D())
+                case "U": self.residues.append(Uracil3D())
+                case "C": self.residues.append(Cytosine3D())
+                case _: raise RuntimeError("Unknown residue "+residue_name) 
         self.residues[absolute_position-1].add_atom(atom_name,coords)
             
 modified_ribonucleotides = {
