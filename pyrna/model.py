@@ -1,5 +1,5 @@
 import re
-from itertools import groupby
+from itertools import groupby, product
 from operator import itemgetter
 
 class Block:
@@ -273,15 +273,19 @@ class AcceptorExoA:
         return self.name
 
 class Residue3D:
-    def __init__(self):
+    def __init__(self, position):
         self.atoms = [] #a list of Atom objects
+        self.position = position
 
     def add_atom(self, atom_name, coords):
         self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+    
+    def get_WC_atoms(self):
+        return []
 
 class Guanine3D(Residue3D):
-    def __init__(self):
-        Residue3D.__init__(self)
+    def __init__(self, position):
+        Residue3D.__init__(self, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
@@ -291,13 +295,17 @@ class Guanine3D(Residue3D):
             case "O6": self.atoms.append(AcceptorExoA(atom_name, coords[0], coords[1], coords[2]))
             case "N7": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
             case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
+
+    def get_WC_atoms(self):
+        target_atom_names = ["N1", "N2", "O6"] 
+        return [a for a in self.atoms if a.name in target_atom_names]
     
     def __str__(self):
-        return "G"
+        return "G"+str(self.position)
 
 class Adenine3D(Residue3D):
-    def __init__(self):
-        Residue3D.__init__(self)
+    def __init__(self, position):
+        Residue3D.__init__(self, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
@@ -307,12 +315,16 @@ class Adenine3D(Residue3D):
             case "N7": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
             case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
 
+    def get_WC_atoms(self):
+        target_atom_names = ["N1", "N6"] 
+        return [a for a in self.atoms if a.name in target_atom_names]
+
     def __str__(self):
-        return "A"
+        return "A"+str(self.position)
 
 class Uracil3D(Residue3D):
-    def __init__(self):
-        Residue3D.__init__(self)
+    def __init__(self, position):
+        Residue3D.__init__(self, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
@@ -321,22 +333,30 @@ class Uracil3D(Residue3D):
             case "O4": self.atoms.append(AcceptorExoA(atom_name, coords[0], coords[1], coords[2]))
             case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
 
+    def get_WC_atoms(self):
+        target_atom_names = ["O2", "N3", "O4"] 
+        return [a for a in self.atoms if a.name in target_atom_names]
+
     def __str__(self):
-        return "U"
+        return "U"+str(self.position)
 
 class Cytosine3D(Residue3D):
-    def __init__(self):
-        Residue3D.__init__(self)
+    def __init__(self, position):
+        Residue3D.__init__(self, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
             case "O2": self.atoms.append(AcceptorExoA(atom_name, coords[0], coords[1], coords[2]))
-            case "N3": self.atoms.append(DonorEndoA(atom_name, coords[0], coords[1], coords[2]))
+            case "N3": self.atoms.append(AcceptorEndoA(atom_name, coords[0], coords[1], coords[2]))
             case "N4": self.atoms.append(DonorExoA(atom_name, coords[0], coords[1], coords[2]))
             case _: self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
 
+    def get_WC_atoms(self):
+        target_atom_names = ["O2", "N3", "N4"]
+        return [a for a in self.atoms if a.name in target_atom_names]
+
     def __str__(self):
-        return "C"
+        return "C"+str(self.position)
 
 class TertiaryStructure:
 
@@ -356,12 +376,51 @@ class TertiaryStructure:
         if absolute_position-1 >= len(self.residues):
             self.rna.add_residue(residue_name)
             match(residue_name):
-                case "A": self.residues.append(Adenine3D())
-                case "G": self.residues.append(Guanine3D())
-                case "U": self.residues.append(Uracil3D())
-                case "C": self.residues.append(Cytosine3D())
+                case "A": self.residues.append(Adenine3D(absolute_position))
+                case "G": self.residues.append(Guanine3D(absolute_position))
+                case "U": self.residues.append(Uracil3D(absolute_position))
+                case "C": self.residues.append(Cytosine3D(absolute_position))
                 case _: raise RuntimeError("Unknown residue "+residue_name) 
         self.residues[absolute_position-1].add_atom(atom_name,coords)
+
+    def find_canonical_basepairs(self):
+        for i in range(0, len(self.residues)-1):
+            r = self.residues[i]
+            for j in range(i+1, len(self.residues)):
+                next_r = self.residues[j]
+                match r :
+                    case Adenine3D():
+                        match next_r:
+                            case Uracil3D(): compute_pairing(r, next_r)
+                    case Guanine3D():
+                        match next_r:
+                            case Cytosine3D(): compute_pairing(r,next_r)
+                            case Uracil3D(): compute_pairing(r,next_r)
+                    case Uracil3D():
+                        match next_r:
+                            case Guanine3D(): compute_pairing(r,next_r)
+                            case Adenine3D(): compute_pairing(r,next_r)
+                    case Cytosine3D():
+                        match next_r:
+                            case Guanine3D(): compute_pairing(r,next_r)
+
+"""
+r1: a first instance of Residue3D
+r2: a second instance of Residue3D 
+"""
+def compute_pairing(r1, r2):
+    print(f"{r1}-{r2}")
+    donors = [a for a in r1.atoms if isinstance(a, DonorEndoA) or isinstance(a, DonorExoA)]
+    acceptors = [a for a in r1.atoms if isinstance(a, AcceptorEndoA) or isinstance(a, AcceptorExoA)]
+    
+    acceptors_2 = [a for a in r2.atoms if isinstance(a, AcceptorEndoA) or isinstance(a, AcceptorExoA)]
+    hbonds = list(product(donors, acceptors_2))
+    for hbond in hbonds:
+        print(f"{hbond[0]} ~ {hbond[1]}")
+    donors_2 = [a for a in r2.atoms if isinstance(a, DonorEndoA) or isinstance(a, DonorExoA)]
+    hbonds = list(product(acceptors, donors_2))
+    for hbond in hbonds:
+        print(f"{hbond[0]} ~ {hbond[1]}")
             
 modified_ribonucleotides = {
     "T": "U",
