@@ -384,33 +384,35 @@ class TertiaryStructure:
                 case _: raise RuntimeError("Unknown residue "+residue_name) 
         self.residues[absolute_position-1].add_atom(atom_name,coords)
 
-    def find_canonical_basepairs(self):
+    def find_canonical_basepairs(self, chain_name):
         for i in range(0, len(self.residues)-1):
             r = self.residues[i]
-            for j in range(i+1, len(self.residues)):
-                next_r = self.residues[j]
-                match r :
-                    case Adenine3D():
-                        match next_r:
-                            case Uracil3D(): compute_pairing(r, next_r)
-                    case Guanine3D():
-                        match next_r:
-                            case Cytosine3D(): compute_pairing(r,next_r)
-                            case Uracil3D(): compute_pairing(r,next_r)
-                    case Uracil3D():
-                        match next_r:
-                            case Guanine3D(): compute_pairing(r,next_r)
-                            case Adenine3D(): compute_pairing(r,next_r)
-                    case Cytosine3D():
-                        match next_r:
-                            case Guanine3D(): compute_pairing(r,next_r)
+            if r.chain_name == chain_name:
+                for j in range(i+1, len(self.residues)):
+                    next_r = self.residues[j]
+                    if next_r.chain_name == chain_name:
+                        match r :
+                            case Adenine3D():
+                                match next_r:
+                                    case Uracil3D(): compute_pairing(r, next_r)
+                            case Guanine3D():
+                                match next_r:
+                                    case Cytosine3D(): compute_pairing(r,next_r)
+                                    case Uracil3D(): compute_pairing(r,next_r)
+                            case Uracil3D():
+                                match next_r:
+                                    case Guanine3D(): compute_pairing(r,next_r)
+                                    case Adenine3D(): compute_pairing(r,next_r)
+                            case Cytosine3D():
+                                match next_r:
+                                    case Guanine3D(): compute_pairing(r,next_r)         
 
 """
 r1: a first instance of Residue3D
 r2: a second instance of Residue3D 
 """
 def compute_pairing(r1, r2):
-    print(f"{r1}-{r2}")
+    print(f"{r1.chain_name}-{r2.chain_name}")
     donors = [a for a in r1.atoms if isinstance(a, DonorEndoA) or isinstance(a, DonorExoA)]
     acceptors = [a for a in r1.atoms if isinstance(a, AcceptorEndoA) or isinstance(a, AcceptorExoA)]
     
