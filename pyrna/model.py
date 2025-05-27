@@ -198,28 +198,53 @@ class BasePair:
         self.orientation = orientation
 
 class Helix:
-    def __init__(self, start, end, length):
+    def __init__(self, name, start, end, length):
         """
         Parameters:
         ---------
+        name: the name for this helix
         start: the position of the first residue in the first strand 
         end: the position of the last residue in the second strand 
         length: helix size, meaning the number of basepairs
         """
+        self.name = name
         self.location = Location(nested_lists=[[start,start+length-1],[end-length+1,end]])
 
 class SecondaryStructure:
     """
     This class stores everything describing a secondary structure: helices, junctions, tertiary interactions...
     """
-    def __init__(self, rna):
+    def __init__(self, rna, base_pairs = []):
         self.name = "2D"
         self.rna = rna
         self.tertiary_interactions = []
         self.helices = []
         self.junctions = []
-        self.base_pairs = []
+        if len(base_pairs) > 0:
+           self.find_helices(base_pairs) 
 
+    """
+    An Helix is made with at least two basepairs between contiguous residues in the RNA sequence
+    """
+    def find_helices(self, base_pairs):
+        helix_start = -1
+        former_bp = None
+        for bp in base_pairs:
+            if not former_bp:
+                length = 1
+                helix_start = bp.location.start()
+            else:
+                if bp.location.start() == former_bp.location.start()+1 and bp.location.end() == former_bp.location.end()-1:
+                   length += 1
+                else:
+                    if length >= 2 :
+                        self.helices.append(Helix("H"+str(len(self.helices)+1), helix_start, former_bp.location.end(), length))  
+                    length = 1
+                    helix_start = bp.location.start() 
+            former_bp = bp    
+        #last helix (if any)
+        if length >= 2 :
+            self.helices.append(Helix("H"+str(len(self.helices)+1), helix_start, former_bp.location.end(), length))
 class Atom:
     def __init__(self, name, x, y, z):
         self.name = name
