@@ -257,7 +257,7 @@ def parse_pdb(pdb_data):
             x = float(line[30:38].strip())
             y = float(line[38:46].strip())
             z = float(line[46:54].strip())
-            current_3D.add_atom(atom_name, current_residue_name, absolute_position, [x,y,z])
+            current_3D.add_atom(atom_name, current_residue_name, current_chain, absolute_position, [x,y,z])
 
         elif header == 'TITLE':
             title += line[10:]

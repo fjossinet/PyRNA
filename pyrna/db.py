@@ -1,6 +1,6 @@
 from urllib.request import urlopen
 
-class PDB:
+class PDB:   
     """
     Wrapper for the PDB database http://www.rcsb.org/
     """

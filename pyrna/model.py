@@ -273,9 +273,10 @@ class AcceptorExoA:
         return self.name
 
 class Residue3D:
-    def __init__(self, position):
+    def __init__(self, chain_name, position):
         self.atoms = [] #a list of Atom objects
         self.position = position
+        self.chain_name = chain_name
 
     def add_atom(self, atom_name, coords):
         self.atoms.append(Atom(atom_name, coords[0], coords[1], coords[2]))
@@ -284,8 +285,8 @@ class Residue3D:
         return []
 
 class Guanine3D(Residue3D):
-    def __init__(self, position):
-        Residue3D.__init__(self, position)
+    def __init__(self, chain_name, position):
+        Residue3D.__init__(self, chain_name, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
@@ -304,8 +305,8 @@ class Guanine3D(Residue3D):
         return "G"+str(self.position)
 
 class Adenine3D(Residue3D):
-    def __init__(self, position):
-        Residue3D.__init__(self, position)
+    def __init__(self, chain_name, position):
+        Residue3D.__init__(self, chain_name, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
@@ -323,8 +324,8 @@ class Adenine3D(Residue3D):
         return "A"+str(self.position)
 
 class Uracil3D(Residue3D):
-    def __init__(self, position):
-        Residue3D.__init__(self, position)
+    def __init__(self, chain_name, position):
+        Residue3D.__init__(self, chain_name, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
@@ -341,8 +342,8 @@ class Uracil3D(Residue3D):
         return "U"+str(self.position)
 
 class Cytosine3D(Residue3D):
-    def __init__(self, position):
-        Residue3D.__init__(self, position)
+    def __init__(self, chain_name, position):
+        Residue3D.__init__(self, chain_name, position)
 
     def add_atom(self, atom_name, coords):
         match atom_name:
@@ -365,7 +366,7 @@ class TertiaryStructure:
         self.name = "N.A."
         self.residues = [] #a list of Residue3D objects
 
-    def add_atom(self, atom_name, residue_name, absolute_position, coords):
+    def add_atom(self, atom_name, residue_name, chain_name, absolute_position, coords):
         atom_name = re.sub("\*", "'", atom_name)
         if atom_name == 'OP1':
             atom_name = 'O1P'
@@ -376,10 +377,10 @@ class TertiaryStructure:
         if absolute_position-1 >= len(self.residues):
             self.rna.add_residue(residue_name)
             match(residue_name):
-                case "A": self.residues.append(Adenine3D(absolute_position))
-                case "G": self.residues.append(Guanine3D(absolute_position))
-                case "U": self.residues.append(Uracil3D(absolute_position))
-                case "C": self.residues.append(Cytosine3D(absolute_position))
+                case "A": self.residues.append(Adenine3D(chain_name, absolute_position))
+                case "G": self.residues.append(Guanine3D(chain_name, absolute_position))
+                case "U": self.residues.append(Uracil3D(chain_name, absolute_position))
+                case "C": self.residues.append(Cytosine3D(chain_name, absolute_position))
                 case _: raise RuntimeError("Unknown residue "+residue_name) 
         self.residues[absolute_position-1].add_atom(atom_name,coords)
 
