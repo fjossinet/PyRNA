@@ -2,6 +2,30 @@ import re, math
 from itertools import groupby, product
 from operator import itemgetter
 
+class SecondaryStructureProviderParams:
+    """
+    This class needs to be specialized in order to stores the parameters that are mandatory for a SecondaryStructureProvider in order to return a SecondaryStructure object
+    """
+    
+    def __init__(self):
+        self.params = {}
+
+class SecondaryStructureProvider:
+    """
+    This class handles the communication with a data source describing (directly or indirectly) an RNA 2D structure. 
+    The data source can be an algorithm, a local file, a public database,...
+    """
+
+    def __init__(self):
+        pass 
+
+    """
+    This method returns a SecondaryStructure object using the information defined in the parameters given as argument.
+    """
+    def get_secondary_structure(self, params):
+        return SecondaryStructure(rna = RNA(sequence = ""))
+    
+
 class Block:
     """
     A continuous range of molecular positions, with a single start and end point.

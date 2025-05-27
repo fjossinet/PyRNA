@@ -1,5 +1,5 @@
 import re
-from pyrna.model import RNA, BasePair, TertiaryStructure
+from pyrna.model import RNA, BasePair, TertiaryStructure, SecondaryStructure, SecondaryStructureProvider, SecondaryStructureProviderParams
 
 def to_pdb(tertiary_structure, location = None):
     """
@@ -51,60 +51,6 @@ def to_fasta(molecules, single_line=False):
     for molecule in molecules:
         outputs.append(molecule.to_fasta(single_line))
     return '\n'.join(outputs)
-
-def to_rnaml(rna, bps):
-    """
-    Convert an RNA object and its list of base-pairs into RNAML data
-
-    Parameters:
-    -----------
-    - rna: an RNA object (see pyrna.model)
-    - bps: a list of BasePair objects
-
-    Returns:
-    ------
-    the RNAML data as a String
-    """
-    for i in range(0,len(bps)):
-        data = """\
-<rnaml version="1.1">
-  <molecule id="{rna_name}">
-    <identity>
-      <name>{rna_name}</name>
-    </identity>
-    <sequence length="">
-        <seq-data>
-        {rna_sequence}
-        </seq-data>
-    </sequence>
-    <structure>
-        <model id="{model_id}">		        				    
-            <str-annotation>""".format(rna_name = rna[i].name, rna_sequence = rna[i].sequence, model_id = i+1)
-        for bp in bps[i]:
-            data += """
-                <base-pair">
-                    <base-id-5p>
-                        <base-id>
-                            <position>{bp_start}</position>
-                        </base-id>
-                    </base-id-5p>
-                    <base-id-3p>
-                        <base-id>
-                            <position>{bp_end}</position>
-                        </base-id>
-                    </base-id-3p>
-                    <edge-5p>W</edge-5p>
-                    <edge-3p>W</edge-3p>
-                    <bond-orientation>cis</bond-orientation>
-                </base-pair>""".format(bp_start = bp.location.start(), bp_end = bp.location.end())
-            
-        data += """
-            </str-annotation>	
-        </model>
-    </structure>		
-  </molecule>			
-</rnaml>"""
-    return data
 
 
 def parse_fasta(fasta_data):
@@ -204,6 +150,35 @@ def parse_bn(bn):
             basePairs.append(BasePair(lastPairedPos.pop(),i))
 
     return basePairs
+
+class PDBFileProviderParams(SecondaryStructureProviderParams):
+
+    def __init__(self):
+        SecondaryStructureProviderParams.__init__(self)
+
+    def set_input_file(self, input_file):
+        self.params["input_file"] = input_file
+
+    def get_input_file(self):
+        return self.params["input_file"]
+    
+    def set_chain_name(self, chain_name):
+        self.params["chain_name"] = chain_name
+
+    def get_chain_name(self):
+        return self.params["chain_name"]
+
+class PDBFileProvider(SecondaryStructureProvider):
+
+    def __init__(self):
+        SecondaryStructureProvider.__init__(self)
+
+    def get_secondary_structure(self, params):
+        with open(params.get_input_file()) as f: 
+            for ts in parse_pdb(f.readlines()):
+                if ts.rna.name == params.get_chain_name():
+                    ss = SecondaryStructure(rna = ts.rna, base_pairs=ts.find_canonical_basepairs(chain_name = ts.rna.name))
+                    return ss
 
 def parse_pdb(pdb_data):
     """
