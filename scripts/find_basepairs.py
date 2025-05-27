@@ -9,7 +9,8 @@ from pyrna.parsers import parse_pdb
 
 def find_bps(pdb_id, chain_name):
     for ts in parse_pdb(PDB().get_entry(pdb_id)):
-        ts.find_canonical_basepairs(chain_name)
+        for bp in ts.find_canonical_basepairs(chain_name):
+            print(f"{bp.location.start()} - {bp.location.end()}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

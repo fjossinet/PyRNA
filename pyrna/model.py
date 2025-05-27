@@ -1,4 +1,4 @@
-import re
+import re, math
 from itertools import groupby, product
 from operator import itemgetter
 
@@ -384,7 +384,11 @@ class TertiaryStructure:
                 case _: raise RuntimeError("Unknown residue "+residue_name) 
         self.residues[absolute_position-1].add_atom(atom_name,coords)
 
+    """
+    Return a list of BasePair objects
+    """
     def find_canonical_basepairs(self, chain_name):
+        base_pairs = []
         for i in range(0, len(self.residues)-1):
             r = self.residues[i]
             if r.chain_name == chain_name:
@@ -394,36 +398,62 @@ class TertiaryStructure:
                         match r :
                             case Adenine3D():
                                 match next_r:
-                                    case Uracil3D(): compute_pairing(r, next_r)
+                                    case Uracil3D(): 
+                                        if (compute_pairing(r, next_r)):
+                                            base_pairs.append(BasePair(r.position, next_r.position))
+
                             case Guanine3D():
                                 match next_r:
-                                    case Cytosine3D(): compute_pairing(r,next_r)
-                                    case Uracil3D(): compute_pairing(r,next_r)
+                                    case Cytosine3D():
+                                        if (compute_pairing(r, next_r)):
+                                            base_pairs.append(BasePair(r.position, next_r.position))
+                                    case Uracil3D(): 
+                                        if (compute_pairing(r, next_r)):
+                                            base_pairs.append(BasePair(r.position, next_r.position))
                             case Uracil3D():
                                 match next_r:
-                                    case Guanine3D(): compute_pairing(r,next_r)
-                                    case Adenine3D(): compute_pairing(r,next_r)
+                                    case Guanine3D(): 
+                                        if (compute_pairing(r, next_r)):
+                                            base_pairs.append(BasePair(r.position, next_r.position))
+                                    case Adenine3D(): 
+                                        if (compute_pairing(r, next_r)):
+                                            base_pairs.append(BasePair(r.position, next_r.position))
                             case Cytosine3D():
                                 match next_r:
-                                    case Guanine3D(): compute_pairing(r,next_r)         
+                                    case Guanine3D(): 
+                                        if (compute_pairing(r, next_r)):
+                                            base_pairs.append(BasePair(r.position, next_r.position))
+        return base_pairs         
 
 """
+Two residues are paired if they're making at least two hydrogen bonds
 r1: a first instance of Residue3D
 r2: a second instance of Residue3D 
 """
 def compute_pairing(r1, r2):
-    print(f"{r1.chain_name}-{r2.chain_name}")
+
+    hbond_count = 0
+
     donors = [a for a in r1.atoms if isinstance(a, DonorEndoA) or isinstance(a, DonorExoA)]
     acceptors = [a for a in r1.atoms if isinstance(a, AcceptorEndoA) or isinstance(a, AcceptorExoA)]
     
     acceptors_2 = [a for a in r2.atoms if isinstance(a, AcceptorEndoA) or isinstance(a, AcceptorExoA)]
     hbonds = list(product(donors, acceptors_2))
     for hbond in hbonds:
-        print(f"{hbond[0]} ~ {hbond[1]}")
+        if atoms_distance(hbond[0],hbond[1]) <= 3.0:
+            hbond_count += 1
     donors_2 = [a for a in r2.atoms if isinstance(a, DonorEndoA) or isinstance(a, DonorExoA)]
     hbonds = list(product(acceptors, donors_2))
     for hbond in hbonds:
-        print(f"{hbond[0]} ~ {hbond[1]}")
+        if atoms_distance(hbond[0],hbond[1]) <= 3.0:
+            hbond_count += 1
+    return hbond_count >= 2
+
+"""
+Compute the 3D distance between two Atom objects
+"""
+def atoms_distance(a1, a2):
+    return math.dist([a1.x, a1.y, a1.z], [a2.x, a2.y, a2.z])
             
 modified_ribonucleotides = {
     "T": "U",
